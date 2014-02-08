@@ -1,0 +1,66 @@
+Objectives
+----------
+
+The main idea of this app is let the user to be able to tag/link objects, where objects
+could be contacts, or anything else (don't know now what else could be).
+We probably also want to link persons between them, or link tags between them.
+In the case of persons, link to persons could be, friend of, child of, or whatever.
+In the case of tags the links could be some kind of relationships / alias between
+tags.
+
+Listing the objectives:
+- Be able to handle contacts information.
+- Be able to create tags with general information / description.
+- Be able to tag objects with and additional information for the tag.
+- Be able to create links with names and descriptions.
+- Be able to link persons / elements with specific description.
+- Be able to link tags.
+- Be able to find persons / elements by name.
+- Be able to find persons / elements by description.
+- Be able to find persons / elements by tags.
+- Be able to find persons / elements by tags descriptions.
+- Be able to find persons / elements by links.
+- Be able to find persons / elements by all the above.
+- Be able to find tags by name.
+- Be able to find tags by description.
+- Be able to find tags by persons.
+- Be able to find tags by links.
+- Be able to find tags by all the above.
+- Be able to find tags by links by name.
+- Be able to find links by name.
+- Be able to find links by persons.
+- Be able to find links by tags.
+- Be able to find links by all.
+- Be able to find anything searching in all the fields, from a plain text. 
+
+
+Requirements
+------------
+
+- Be able to handle contacts with different information like: phone numbers,
+  account ids (facebook, g+, etc), mails, address, city, age, etc.
+- Each element (tag, contact/object, link) should have an unique id).
+- Be able to save / load all this information from a file (xml or whatever). This
+  way we will be able to save in a repository all this information.
+- Be able to modify any element (tag, contact/object, link).
+- Be able to remove any element.
+- Be able to do a real time find (here we probably need to implement a real time
+  search algorithm, probably for now it will be wrap into a simple search -linear-
+  algorithm).
+- Should have a very trivial UI, very easy to use, and each element (tag, contacts,
+  etc) should contain a limited "string" size for each field (this will force the
+  user to maintain simple tag/link names.
+- Be able to customize the search of different stuff (contacts/links/tags/etc).
+  Probably a SearchManager class will be used to handle this.
+
+
+Extra features
+--------------
+
+- Implement different importers to create these contacts, from facebook, android
+  phone, gmail, etc.
+- Improve the search algorithm to be real time.
+- Share content with other people (Share part of the data base for example, share
+- contacts, etc).
+
+
