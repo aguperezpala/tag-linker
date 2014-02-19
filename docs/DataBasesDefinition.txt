@@ -3,6 +3,10 @@ Data bases (v 0.1)
 
 We will define the main data base and tables like next:
 
+Table TagLinker
+- Version       The current version
+- 
+
 Table Element:
 - ID primary key (unique / auto increment).
 - Type (enum to define the type: Contact | tag | link).
