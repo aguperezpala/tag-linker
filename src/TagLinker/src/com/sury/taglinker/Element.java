@@ -16,6 +16,12 @@ public class Element {
 		type = eType;
 	}
 	
+	// Setters
+	//
+	public void setID(int id) {
+		this.id = id;
+	}
+	
 	// Getters
 	//
 	public int getID() {

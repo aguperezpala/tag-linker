@@ -6,8 +6,11 @@ public class Tag extends Element {
 	private String name;
 	private String description;
 	
-	// Constructor
+	// Constructors
 	//
+	Tag() {
+		super(-1, ElementType.TAG);
+	}
 	Tag(int id) {
 		super(id, ElementType.TAG);
 	}

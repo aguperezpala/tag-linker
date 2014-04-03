@@ -10,8 +10,11 @@ public class Contact extends Element {
 	private String location;
 	private ArrayList<ContactInfo> contactInfoList = null;
 	
-	// Constructor
+	// Constructors
 	//
+	public Contact() {
+		super(-1, ElementType.CONTACT);
+	}
 	public Contact(int id) {
 		super(id, ElementType.CONTACT);
 	}

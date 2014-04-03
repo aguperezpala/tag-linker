@@ -245,7 +245,9 @@ public class DBHandler extends SQLiteOpenHelper {
 	//
     
     // @brief This private method will create a new element and will return
-    //		  the new ID to that element
+    //		  the new ID to that element.
+    //		  This method will open the DB so be sure you don't have already
+    //		  opened the db
     // @return the new id on success | <= 0 on error.
     //
     private long createElement(int type) {
@@ -260,6 +262,7 @@ public class DBHandler extends SQLiteOpenHelper {
 	    
     	return result;
     }
+    
     // @brief Remove an element from a given id
     // @return true on success | false otherwise
     private boolean removeElement(long id) {
@@ -274,7 +277,10 @@ public class DBHandler extends SQLiteOpenHelper {
     // Contact and contact info
     //
     
-    // @brief Create a new entry
+    // @brief Create a new entry for contacts from a given ContactRepresentation
+    // @param c		The contact representation
+    // @return true on success | false otherwise
+    // @note No exception handling here.
     //
     public boolean createContact(ContactRep c) {
     	if (c == null) {
@@ -307,6 +313,11 @@ public class DBHandler extends SQLiteOpenHelper {
 	    db.close(); // Closing database connection
     	return result >= 0;
     }
+    // @brief Create a new entry for contactInfo from a given ContactInfoRep
+    // @param ci	The contactInfo representation
+    // @return true on success | false otherwise
+    // @note No exception handling here.
+    //
     public boolean createContactInfo(ContactInfoRep ci) {
     	if (ci == null) {
     		assert (ci != null);
@@ -330,7 +341,12 @@ public class DBHandler extends SQLiteOpenHelper {
     	return result >= 0;
     }
     
-    // @brief Update an already created contact
+    // @brief Update an already created contact. This will update all the fields
+    //		  of the contact.
+    //		  If the entry doesn't exists this will return an error.
+    // @param c		The contact representation to be updated
+    // @return true on success | false otherwise
+    // @note No exception handling here.
     //
     public boolean updateContact(ContactRep c) {
     	if (c == null) {
@@ -356,6 +372,13 @@ public class DBHandler extends SQLiteOpenHelper {
         return result > 0;
     }
     
+    // @brief Update an already created contact info. This will update all the fields
+    //		  of the contactInfo.
+    //		  If the entry doesn't exists this will return an error.
+    // @param co	The contactInfo representation to be updated
+    // @return true on success | false otherwise
+    // @note No exception handling here.
+    //
     public boolean updateContactInfo(ContactInfoRep ci) {
     	if (ci == null) {
     		assert (ci != null);
@@ -391,8 +414,13 @@ public class DBHandler extends SQLiteOpenHelper {
     // 		  but it will not remove the associated elements like links nor
     //	      tags nor any other element that is related with this contact.
     //		  Is the caller responsibility to do that.
+    //		  If you try to remove an inexistent element this method will
+    //		  return false
+    // @param id	The id of the element to be removed
+    // @return true on success | false otherwise.
+    // @note No exceptions handling here
     //
-    public boolean removeContact(int id) {
+    public boolean removeContact(long id) {
     	SQLiteDatabase db = this.getWritableDatabase();
     	// we should first remove the contact in the element table
     	
@@ -422,6 +450,17 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
         return result > 0;
     }
+    
+    // @brief The destruction methods will remove the instance from the DB
+    // 		  but it will not remove the associated elements like links nor
+    //	      tags nor any other element that is related with this contact.
+    //		  Is the caller responsibility to do that.
+    //		  If you try to remove an inexistent element this method will
+    //		  return false
+    // @param ci	The Contact info representation to be removed
+    // @return true on success | false otherwise.
+    // @note No exceptions handling here
+    //
     public boolean removeContactInfo(ContactInfoRep ci) {
     	SQLiteDatabase db = this.getWritableDatabase();
         int result = db.delete(TABLE_CONTACTS_INFO,
@@ -435,10 +474,27 @@ public class DBHandler extends SQLiteOpenHelper {
         return result > 0;
     }
     
+    // @brief Remove a contact info from a given Contact ID
+    // @param id	The ID we want to use to remove the entries
+    // @return the number of entries removed
+    // @note No exceptions handling here
+    //
+    public int removeContactInfoEntries(long id) {
+    	SQLiteDatabase db = this.getWritableDatabase();
+        int result = db.delete(TABLE_CONTACTS_INFO,
+        		KEY_CONTACTINF_CID + " = ?",
+                new String[] { String.valueOf(id)});
+        db.close();
+        return result;
+    }
+    
     // Tags queries
     //
     
-    // @brief Construction queries
+    // @brief Create a new entry for tags from a given TagRepresentation
+    // @param t		The tag representation
+    // @return true on success | false otherwise
+    // @note No exception handling here.
     //
     public boolean createTag(TagRep t) {
     	if (t == null) {
@@ -468,6 +524,12 @@ public class DBHandler extends SQLiteOpenHelper {
 	    db.close(); // Closing database connection
     	return result >= 0;
     }
+    
+    // @brief Create a new tagEntry from a given TagEntryRepresentation
+    // @param te	The tagEntry representation
+    // @return true on success | false otherwise
+    // @note No exception handling here.
+    //
     public boolean createTagEntry(TagEntryRep te) {
     	if (te == null) {
     		assert (te != null);
@@ -488,7 +550,12 @@ public class DBHandler extends SQLiteOpenHelper {
     	return result >= 0;
     }
     
-    // @brief Update an already created contact
+    // @brief Update an already created tag. If the tag doesn't exists this method
+    // 		  will return false.
+    //		  All the fields will be updated.
+    // @param t		The representation
+    // @return true on success | false otherwise
+    // @note No exceptions are handled here
     //
     public boolean updateTag(TagRep t) {
     	SQLiteDatabase db = this.getWritableDatabase();
@@ -507,7 +574,20 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
         return result  > 0;
     }
+    
+    // @brief Update an already created tag entry. If the tag entry doesn't 
+    // 		  exists this method will return false.
+    //		  All the fields will be updated.
+    // @param te	The representation
+    // @return true on success | false otherwise
+    // @note No exceptions are handled here
+    //
     public boolean updateTagEntry(TagEntryRep te) {
+    	if (te == null) {
+    		assert te != null;
+    		return false;
+    	}
+    	
     	SQLiteDatabase db = this.getWritableDatabase();
 
     	// now we know that we create a new row, so we will use the new ID
@@ -517,7 +597,7 @@ public class DBHandler extends SQLiteOpenHelper {
 	    values.put(KEY_TAGSENTRY_TID, te.tagID);
 	    values.put(KEY_TAGSENTRY_DESC, te.description);
 	    
-	 // updating row
+	    // updating row
         int result = db.update(TABLE_TAGS, values, KEY_TAGSENTRY_TID + " = ?" + 
         				 " AND " +
         				 KEY_TAGSENTRY_CID + " = ?",
@@ -529,10 +609,15 @@ public class DBHandler extends SQLiteOpenHelper {
     
     // @brief The destruction methods will remove the instance from the DB
     // 		  but it will not remove the associated elements like links nor
-    //	      tags nor any other element that is related with this tag.
+    //	      tags nor any other element that is related with this contact.
     //		  Is the caller responsibility to do that.
+    //		  If you try to remove an inexistent element this method will
+    //		  return false
+    // @param id	The id of the element to be removed
+    // @return true on success | false otherwise.
+    // @note No exceptions handling here
     //
-    public boolean removeTag(int id) {
+    public boolean removeTag(long id) {
     	SQLiteDatabase db = this.getWritableDatabase();
     	
     	// we should first remove the contact in the element table    	
@@ -562,7 +647,23 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
         return result > 0;
     }
+    
+    // @brief The destruction methods will remove the instance from the DB
+    // 		  but it will not remove the associated elements like links nor
+    //	      tags nor any other element that is related with this contact.
+    //		  Is the caller responsibility to do that.
+    //		  If you try to remove an inexistent element this method will
+    //		  return false
+    // @param te	The tag entry to be removed
+    // @return true on success | false otherwise.
+    // @note No exceptions handling here
+    //
     public boolean removeTagEntry(TagEntryRep te) {
+    	if (te == null) {
+    		assert te != null;
+    		return false;
+    	}
+    	
     	SQLiteDatabase db = this.getWritableDatabase();
     	
         // now try to remove it from the table tag
@@ -577,7 +678,44 @@ public class DBHandler extends SQLiteOpenHelper {
         return result > 0;
     }
     
-    // Links methods
+    // @brief Remove TagEntry's from a given Tag ID
+    // @param id	The ID we want to use to remove the entries
+    // @return the number of entries removed
+    // @note No exceptions handling here
+    //
+    public int removeTagEntriesFromTag(long id) {
+    	SQLiteDatabase db = this.getWritableDatabase();
+    	
+        // now try to remove it from the table tag
+        int result = db.delete(TABLE_TAGS_ENTRY, KEY_TAGSENTRY_TID + " = ?", 
+        		new String[] { String.valueOf(id)});
+              
+        // everything fine?
+        db.close();
+        return result;
+    }
+    
+    // @brief Remove TagEntry's from a given Contact ID
+    // @param id	The ID we want to use to remove the entries
+    // @return the number of entries removed
+    // @note No exceptions handling here
+    //
+    public int removeTagEntriesFromContact(long id) {
+    	SQLiteDatabase db = this.getWritableDatabase();
+    	
+        // now try to remove it from the table tag
+        int result = db.delete(TABLE_TAGS_ENTRY, KEY_TAGSENTRY_CID + " = ?", 
+        		new String[] { String.valueOf(id)});
+              
+        // everything fine?
+        db.close();
+        return result;
+    }
+    
+    // @brief Create a new entry for links from a given LinkRepresentation
+    // @param l		The representation
+    // @return true on success | false otherwise
+    // @note No exception handling here.
     //
     public boolean createLink(LinkRep l) {
     	if (l == null) {
@@ -609,9 +747,19 @@ public class DBHandler extends SQLiteOpenHelper {
     	return result >= 0;
     }
     
-    // @brief Update an already created contact
+    // @brief Update an already created link entry. If the link entry doesn't 
+    // 		  exists this method will return false.
+    //		  All the fields will be updated.
+    // @param l		The representation
+    // @return true on success | false otherwise
+    // @note No exceptions are handled here
     //
     public boolean updateLink(LinkRep l) {
+    	if (l == null) {
+    		assert l != null;
+    		return false;
+    	}
+    	
     	SQLiteDatabase db = this.getWritableDatabase();
 
     	// now we know that we create a new row, so we will use the new ID
@@ -633,10 +781,15 @@ public class DBHandler extends SQLiteOpenHelper {
     
     // @brief The destruction methods will remove the instance from the DB
     // 		  but it will not remove the associated elements like links nor
-    //	      tags nor any other element that is related with this link.
+    //	      tags nor any other element that is related with this contact.
     //		  Is the caller responsibility to do that.
+    //		  If you try to remove an inexistent element this method will
+    //		  return false
+    // @param id 	The id of the element to be removed
+    // @return true on success | false otherwise.
+    // @note No exceptions handling here
     //
-    public boolean removeLink(int id) {
+    public boolean removeLink(long id) {
     	SQLiteDatabase db = this.getWritableDatabase();
     	
     	// we should first remove the contact in the element table    	
@@ -667,6 +820,46 @@ public class DBHandler extends SQLiteOpenHelper {
         return result > 0;
     }
     
+    // @brief Remove the links where one of the elements is a given ID
+    // @param id 	The id used to match with some of the elements of the link
+    // @return the number of links removed
+    // @note No exceptions handling here
+    //
+    public int removeLinkFromElement(long id) {
+    	// first get all the elements that matches with the given ID
+	    String selectQuery = "SELECT  * FROM " + TABLE_LINKS + " WHERE " +
+	    		KEY_LINKS_FIRSTID + " = " + String.valueOf(id) + " OR " +
+	    		KEY_LINKS_SECONDID + " = " + String.valueOf(id);;
+	 
+	    SQLiteDatabase db = this.getWritableDatabase();
+	    Cursor cursor = db.rawQuery(selectQuery, null);
+	    ArrayList<LinkRep> lreps = new ArrayList<LinkRep>();
+	    
+	    // looping through all rows and adding to list
+	    if (cursor.moveToFirst()) {
+	        do {
+	        	LinkRep lrep = new LinkRep();
+	        	lrep.id = Integer.parseInt(cursor.getString(0));	            
+	    	    // Adding contact to list
+	    	    lreps.add(lrep);
+	        } while (cursor.moveToNext());
+	    }
+	 
+	    // return contact list
+	    db.close();
+	    cursor.close();
+	    
+	    // now we will remove one by one ... VERY SLOW THIS!
+	    int result =  0;
+	    for (LinkRep lrep : lreps) {
+	    	if (this.removeLink(lrep.id)) {
+	    		result++;
+	    	}
+	    }
+	    
+	    return result;
+    }
+    
 	////////////////////////////////////////////////////////////////////////////
 	// Query methods
 	//
@@ -675,6 +868,8 @@ public class DBHandler extends SQLiteOpenHelper {
 	//
 	
 	// @brief Get the number of contacts we have
+    // @return the number of contacts
+    // @note No exceptions handling here
 	//
 	public int getNumContacts() {
 		String countQuery = "SELECT  * FROM " + TABLE_CONTACTS;
@@ -691,11 +886,11 @@ public class DBHandler extends SQLiteOpenHelper {
 	// TODO
 	
 	// @brief Get an specific Contact from a given ID
-	// @param id		The id of the contact we want to get
-	// @param cr		The ContactRep to be filled
-	// @return true on success | false otherwise
+	// @return the associated representation on success | null element 
+	//		   otherwise
+	// @note No error handling here.
 	//
-	public ContactRep getContact(int id) {
+	public ContactRep getContact(long id) {
 		SQLiteDatabase db = this.getReadableDatabase();
 		 
 	    Cursor cursor = db.query(TABLE_CONTACTS, 
@@ -732,9 +927,10 @@ public class DBHandler extends SQLiteOpenHelper {
 	// @brief Get a list of Contacts from a given list of IDS
 	// TODO
 	
-	// @brief Get all the contacts we have from the DB
-	// @param crs	The contact representations list to be filled
-	// @return true on success | false otherwise
+	// @brief Get all the contacts we have from the DB.
+	// @return the associated list of representations on success | null element 
+	//		   otherwise
+	// @note No error handling here.
 	//
 	public ArrayList<ContactRep> getAllContacts() {
 	    // Select All Query
@@ -767,7 +963,9 @@ public class DBHandler extends SQLiteOpenHelper {
 	    return crs;
 	}
 	
-	// @brief Get the number of contact info
+	// @brief Get the number of contactInfo entries we have
+    // @return the number of contacts
+    // @note No exceptions handling here
 	//
 	public int getNumContactInfo() {
 		String countQuery = "SELECT  * FROM " + TABLE_CONTACTS_INFO;
@@ -780,13 +978,12 @@ public class DBHandler extends SQLiteOpenHelper {
         return cursor.getCount();
 	}
 	
-	// @brief Get all the contact info entries from a given contact ID
-	// @param cid		The contact ID associated to the contactInfo entries we 
-	//					want
-	// @param cirs		The contact info representations list to be filled
-	// @return true on success | false otherwise
+	// @brief Get all the contactInfo entries we have from the DB.
+	// @return the associated list of representations on success | null element 
+	//		   otherwise
+	// @note No error handling here.
 	//
-	public ArrayList<ContactInfoRep> getContactInfoReps(int cid) {
+	public ArrayList<ContactInfoRep> getContactInfoReps(long cid) {
 		// Select All Query
 	    String selectQuery = "SELECT  * FROM " + TABLE_CONTACTS_INFO;
 	 
@@ -819,6 +1016,8 @@ public class DBHandler extends SQLiteOpenHelper {
 	//
 	
 	// @brief Get the number of tags we have
+    // @return the number of tags
+    // @note No exceptions handling here
 	//
 	public int getNumTags() {
 		String countQuery = "SELECT  * FROM " + TABLE_TAGS;
@@ -834,12 +1033,12 @@ public class DBHandler extends SQLiteOpenHelper {
 	// @brief Get all the Tag IDS
 	// TODO
 	
-	// @brief Get a specific tag from a given ID
-	// @param tid		The tag ID we want to retrieve
-	// @param trp		The TagRepresentation to be filled
-	// @return true on success | false otherwise
+	// @brief Get an specific Tag from a given ID
+	// @return the associated representation on success | null element 
+	//		   otherwise
+	// @note No error handling here.
 	//
-	public TagRep getTag(int tid) {
+	public TagRep getTag(long tid) {
 		SQLiteDatabase db = this.getReadableDatabase();
 		 
 	    Cursor cursor = db.query(TABLE_TAGS, 
@@ -872,9 +1071,10 @@ public class DBHandler extends SQLiteOpenHelper {
 	// @brief Get a list of Tags from a list of IDS
 	// TODO
 	
-	// @brief Get all the TagReps we have in the DB
-	// @param treps		The TagRepresentations list
-	// @return true on success | false otherwise
+	// @brief Get all the tags we have from the DB.
+	// @return the associated list of representations on success | null element 
+	//		   otherwise
+	// @note No error handling here.
 	//
 	public ArrayList<TagRep> getAllTags() {
 		// Select All Query
@@ -905,7 +1105,9 @@ public class DBHandler extends SQLiteOpenHelper {
 	    return treps;
 	}
 	
-	// @brief Get the TagEntry count
+	// @brief Get the number of tagEntry entries we have
+    // @return the number of tagEntry entries
+    // @note No exceptions handling here
 	//
 	public int getNumTagEntrys() {
 		String countQuery = "SELECT  * FROM " + TABLE_TAGS_ENTRY;
@@ -918,12 +1120,12 @@ public class DBHandler extends SQLiteOpenHelper {
         return cursor.getCount();
 	}
 	
-	// @brief Get all the tag entries from a given Tag ID.
-	// @param tid		The tag ID used to retrieve the entries.
-	// @param tel		The TagEntry representation list
-	// @return true on success | false otherwise
+	// @brief Get all the tagEntry entries we have from the DB.
+	// @return the associated list of representations on success | null element 
+	//		   otherwise
+	// @note No error handling here.
 	//
-	public ArrayList<TagEntryRep> getTagEntries(int tid) {
+	public ArrayList<TagEntryRep> getTagEntries(long tid) {
 		// Select All Query
 	    String selectQuery = "SELECT  * FROM " + TABLE_TAGS_ENTRY;
 	 
@@ -956,7 +1158,9 @@ public class DBHandler extends SQLiteOpenHelper {
 	// Link queries
 	//
 	
-	// @brief Get the count of links we have
+	// @brief Get the number of links we have
+    // @return the number of links
+    // @note No exceptions handling here
 	//
 	public int getNumLinks() {
 		String countQuery = "SELECT  * FROM " + TABLE_LINKS;
@@ -972,12 +1176,12 @@ public class DBHandler extends SQLiteOpenHelper {
 	// @brief Get all the Link IDS
 	// TODO
 	
-	// @brief Get a link from a given ID
-	// @param lid		The link id
-	// @param lrep		The link representation
-	// @return true on success | false otherwise
+	// @brief Get an specific Link from a given ID
+	// @return the associated representation on success | null element 
+	//		   otherwise
+	// @note No error handling here.
 	//
-	public LinkRep getLink(int lid) {
+	public LinkRep getLink(long lid) {
 		SQLiteDatabase db = this.getReadableDatabase();
 
 		Cursor cursor = db.query(TABLE_TAGS, 
@@ -1010,9 +1214,10 @@ public class DBHandler extends SQLiteOpenHelper {
 	    return lrep;
 	}
 	
-	// @brief Get all the links
-	// @param lreps		The link representation list
-	// @return true on success | false otherwise
+	// @brief Get all the links we have from the DB.
+	// @return the associated list of representations on success | null element 
+	//		   otherwise
+	// @note No error handling here.
 	//
 	public ArrayList<LinkRep> getAllLinks() {
 		// Select All Query
