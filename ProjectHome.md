@@ -1,0 +1,2 @@
+The idea of this application is just to create an easy way to link things with persons, be able to "tag" a person with certain information, description or anything else.
+For example, if you know someone, and you know that that person is working in some place, know someone in certain field, or is linked to someone that could be useful, then, with this app, you will be able to annotate all that useful information in a easy and fast way, adding tags to your contacts.
